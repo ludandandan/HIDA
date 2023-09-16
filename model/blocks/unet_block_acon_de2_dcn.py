@@ -36,11 +36,14 @@ class SPADEUp(nn.Module):
     def __init__(self, opt, in_size, out_size, dropout=0.0, first=False):
         super(SPADEUp, self).__init__()
         self.opt = opt
+        # parsing_nc默认是1，
+        # of input label classes without unknown class. If you have unknown class as class label, specify --contain_dopntcare_label.
         parsing_nc = opt.parsing_nc
+        # norm_G default='spectralspadebatch3x3'
         spade_config_str = opt.norm_G.replace('spectral', '')
         self.nhidden = out_size
         parsed = re.search('spade(\D+)(\d)x\d', spade_config_str)
-        self.ks = int(parsed.group(2))
+        self.ks = int(parsed.group(2)) # 获取第2个捕获组里的内容，实际上就是3
         self.pw = self.ks // 2
         self.layers = nn.ConvTranspose2d(in_size, out_size, 4, 2, 1)
         self.dcn = DCN(in_size, out_size, kernel_size=(3, 3), stride=1, padding=1, deformable_groups=2).cuda()

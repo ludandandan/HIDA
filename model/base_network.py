@@ -15,11 +15,12 @@ class BaseNetwork(nn.Module):
     def modify_commandline_options(parser, is_train):
         return parser
 
+    # 打印网络名称，参数量
     def print_network(self):
         if isinstance(self, list):
             self = self[0]
-        num_params = 0
-        for param in self.parameters():
+        num_params = 0 # 统计模型的参数个数
+        for param in self.parameters():  # self.parameters()返回一个迭代器，包含所有参数张量
             num_params += param.numel()
         print('Network [%s] was created. Total number of parameters: %.1f million. '
               'To see the architecture, do print(network).'
@@ -27,13 +28,14 @@ class BaseNetwork(nn.Module):
 
     def init_weights(self, init_type='normal', gain=0.02):
         def init_func(m):
-            classname = m.__class__.__name__
-            if classname.find('BatchNorm2d') != -1:
+            classname = m.__class__.__name__  # 根据实例获取类名
+            if classname.find('BatchNorm2d') != -1:  # 如果是BN层，那么权重参数初始化为均值为1，标准差为0.02的正态分布，偏差初始化为0
                 if hasattr(m, 'weight') and m.weight is not None:
                     init.normal_(m.weight.data, 1.0, gain)
                 if hasattr(m, 'bias') and m.bias is not None:
                     init.constant_(m.bias.data, 0.0)
             elif hasattr(m, 'weight') and (classname.find('Conv') != -1 or classname.find('Linear') != -1):
+                # 如果是conv或linear，根据传入的初始化方式进行初始化
                 if init_type == 'normal':
                     init.normal_(m.weight.data, 0.0, gain)
                 elif init_type == 'xavier':
@@ -51,9 +53,9 @@ class BaseNetwork(nn.Module):
                 if hasattr(m, 'bias') and m.bias is not None:
                     init.constant_(m.bias.data, 0.0)
 
-        self.apply(init_func)
+        self.apply(init_func)  # init_func应用在self的每一个元素上
 
         # propagate to children
-        for m in self.children():
+        for m in self.children():  # self.children()将返回子模块
             if hasattr(m, 'init_weights'):
-                m.init_weights(init_type, gain)
+                m.init_weights(init_type, gain)  # 这里是怎么回事？？？？？

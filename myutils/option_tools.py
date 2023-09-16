@@ -14,11 +14,13 @@ class ModelOption():
         return parser
 
     def initialize(self, parser):
-        raise NotImplementedError()
+        raise NotImplementedError()  # 需要在子类被实现
 
+    # 获取参数
     def gather_options(self):
         # initialize parser with basic options
         if not self.initialized:
+            # 创建一个ArgumentParser对象，并设置formatter_class
             parser = argparse.ArgumentParser(
                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
             parser = self._initialize_(parser)
@@ -43,10 +45,11 @@ class ModelOption():
         # if opt.load_from_opt_file:
         #     parser = self.update_options_from_file(parser, opt)
 
-        opt = parser.parse_args()
+        opt = parser.parse_args() # 解析命令行参数
         self.parser = parser
         return opt
 
+    # 打印参数（及默认值）
     def print_options(self, opt):
         message = ''
         message += '----------------- Options ---------------\n'
@@ -59,6 +62,7 @@ class ModelOption():
         message += '----------------- End -------------------'
         print(message)
 
+    # 创建目录，获取文件名
     def option_file_path(self, opt, makedir=False):
         expr_dir = os.path.join(opt.checkpoints_dir, opt.name)
         if makedir:
@@ -71,8 +75,10 @@ class ModelOption():
         file_name = os.path.join(expr_dir, 'opt')
         return file_name
 
+    # 将参数保存在文档中
     def save_options(self, opt):
         file_name = self.option_file_path(opt, makedir=True)
+        # 以文本text方式写入
         with open(file_name + '.txt', 'wt') as opt_file:
             for k, v in sorted(vars(opt).items()):
                 comment = ''
@@ -81,9 +87,11 @@ class ModelOption():
                     comment = '\t[default: %s]' % str(default)
                 opt_file.write('{:>25}: {:<30}{}\n'.format(str(k), str(v), comment))
 
+        # 以二进制方式写入
         with open(file_name + '.pkl', 'wb') as opt_file:
             pickle.dump(opt, opt_file)
 
+    # 更新参数的默认值
     def update_options_from_file(self, parser, opt):
         new_opt = self.load_options(opt)
         for k, v in sorted(vars(opt).items()):
@@ -92,6 +100,7 @@ class ModelOption():
                 parser.set_defaults(**{k: new_val})
         return parser
 
+    # 从文件中载入参数
     def load_options(self, opt):
         file_name = self.option_file_path(opt, makedir=False)
         new_opt = pickle.load(open(file_name + '.pkl', 'rb'))

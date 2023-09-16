@@ -4,6 +4,7 @@ from pytorch_lightning.logging import TensorBoardLogger
 from config.SAND_pix_opt import TrainOptions
 from model.total_model.model_gpu import *
 
+# 解析获取命令行参数
 opt = TrainOptions().parse()
 
 def train():
